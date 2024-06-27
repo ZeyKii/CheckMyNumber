@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification de Numéro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 200px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: left; /* Alignement du texte à gauche */
+            padding: 10px; /* Ajout de padding pour une meilleure lisibilité */
+            border: 1px solid #ccc; /* Bordure autour du résultat */
+            border-radius: 4px; /* Coins arrondis pour l'élément */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Vérification de Numéro</h1>
+        <input type="text" id="numberInput" placeholder="Entrez le numéro">
+        <button onclick="checkNumber()">Vérifier</button>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        function checkNumber() {
+            const number = document.getElementById('numberInput').value;
+            
+            // Supprimer le "+" s'il est présent au début
+            let cleanedNumber = number;
+            if (cleanedNumber.startsWith('+')) {
+                cleanedNumber = cleanedNumber.slice(1);  // Supprime le premier caractère (le "+")
+            }
+
+            fetch('/check_number', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ number: cleanedNumber })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById('result');
+                if (data.error) {
+                    resultDiv.innerText = data.error;
+                    resultDiv.style.color = 'red';
+                } else {
+                    const isValid = data.valid ? 'Valide' : 'Non valide';
+                    const isFraudulent = data.line_type === 'voip' ? 'Potentiellement frauduleux' : 'Non suspect';
+                    
+                    // Construction de la réponse complète
+                    resultDiv.innerHTML = `
+                        <p>Statut: ${isValid}</p>
+                        <p>Type de ligne: ${data.line_type}</p>
+                        <p>Format local: ${data.local_format}</p>
+                        <p>Format international: ${data.international_format}</p>
+                        <p>Pays: ${data.country_name} (${data.country_code})</p>
+                        <p>${isFraudulent}</p>
+                    `;
+                    
+                    resultDiv.style.color = data.valid ? 'green' : 'red';
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerText = 'Erreur de communication avec le serveur';
+                resultDiv.style.color = 'red';
+            });
+        }
+    </script>
+</body>
+</html>
