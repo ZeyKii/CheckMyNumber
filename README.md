@@ -56,10 +56,6 @@ L'application sera accessible à l'adresse http://localhost:5000.
 
 - **index.html :** Fichier HTML pour l'interface utilisateur.
 
-- **static/ :** Répertoire contenant les fichiers statiques (CSS, JavaScript).
-
-- **templates/ :** Répertoire contenant les templates Jinja2 pour les pages HTML.
-
 ## Dépendances principales 🛠️
 
 - **Flask :** Framework web utilisé pour le développement de l'application.
